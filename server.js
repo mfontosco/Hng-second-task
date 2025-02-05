@@ -15,8 +15,8 @@ const isPrime = (num) => {
     }
     return true;
 };
-
 const isPerfect = (num) => {
+    if (num <= 1) return false; // Ensure 1 is not considered perfect
     let sum = 1;
     for (let i = 2; i <= Math.sqrt(num); i++) {
         if (num % i === 0) {
@@ -24,8 +24,10 @@ const isPerfect = (num) => {
             if (i !== num / i) sum += num / i;
         }
     }
-    return sum === num && num !== 1;
+    return sum === num;
 };
+
+
 
 const isArmstrong = (num) => {
     const digits = num.toString().split("").map(Number);
