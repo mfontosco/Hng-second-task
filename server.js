@@ -48,7 +48,7 @@ app.get("/api/classify-number", async (req, res) => {
     }
 
     const properties = [];
-    if (isArmstrong(number)) properties.push("armstrong");
+    if (isArmstrong(num)) properties.push("armstrong");
     properties.push(number % 2 === 0 ? "even" : "odd");
     
     try {
