@@ -37,7 +37,7 @@ const getDigitSum = (num) => {
     return num.toString().split("").reduce((sum, digit) => sum + parseInt(digit), 0);
 };
 
-app.get("/number", async (req, res) => {
+app.get("/api/classify-number", async (req, res) => {
     const { number } = req.query;
     const num = parseInt(number);
     
