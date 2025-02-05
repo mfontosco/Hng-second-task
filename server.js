@@ -7,10 +7,18 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
-// Utility functions
+const cache = new Map();
+const CACHE_TTL = 60 * 1000; 
+
+const getCachedFunFact = (num) => {
+    const cached = cache.get(num);
+    return cached && Date.now() - cached.timestamp < CACHE_TTL ? cached.fact : null;
+};
+
 const isPrime = (num) => {
     if (num < 2) return false;
-    for (let i = 2; i <= Math.sqrt(num); i++) {
+    if (num % 2 === 0 && num !== 2) return false;
+    for (let i = 3; i <= Math.sqrt(num); i += 2) {
         if (num % i === 0) return false;
     }
     return true;
@@ -21,8 +29,7 @@ const isPerfect = (num) => {
     let sum = 1;
     for (let i = 2; i <= Math.sqrt(num); i++) {
         if (num % i === 0) {
-            sum += i;
-            if (i !== num / i) sum += num / i;
+            sum += i + (i !== num / i ? num / i : 0);
         }
     }
     return sum === num;
@@ -34,14 +41,13 @@ const isArmstrong = (num) => {
     return digits.reduce((sum, digit) => sum + Math.pow(digit, power), 0) === num;
 };
 
-const getDigitSum = (num) => {
-    return num.toString().split("").reduce((sum, digit) => sum + parseInt(digit), 0);
-};
+const getDigitSum = (num) => num.toString().split("").reduce((sum, digit) => sum + parseInt(digit), 0);
+
+const axiosInstance = axios.create({ timeout: 300 });
 
 app.get("/api/classify-number", async (req, res) => {
     const { number } = req.query;
 
-    // Validate input
     if (!number || isNaN(number) || number.includes(".")) {
         return res.status(400).json({ number: "alphabet", error: true });
     }
@@ -50,31 +56,28 @@ app.get("/api/classify-number", async (req, res) => {
     const properties = [];
 
     if (isArmstrong(num)) properties.push("armstrong");
-    if (num % 2 === 0) properties.push("even");
-    else properties.push("odd");
+    properties.push(num % 2 === 0 ? "even" : "odd");
 
-    try {
-        const funFactResponse = await axios.get(`http://numbersapi.com/${num}/math?json`, { timeout: 300 });
-        const funFact = funFactResponse.data.text;
+    let funFact = getCachedFunFact(num);
 
-        res.json({
-            number: num,
-            is_prime: isPrime(num),
-            is_perfect: isPerfect(num),
-            properties,
-            digit_sum: getDigitSum(num),
-            fun_fact: funFact
-        });
-    } catch (error) {
-        res.json({
-            number: num,
-            is_prime: isPrime(num),
-            is_perfect: isPerfect(num),
-            properties,
-            digit_sum: getDigitSum(num),
-            fun_fact: "No fun fact available."
-        });
+    if (!funFact) {
+        try {
+            const funFactResponse = await axiosInstance.get(`http://numbersapi.com/${num}/math?json`);
+            funFact = funFactResponse.data.text;
+            cache.set(num, { fact: funFact, timestamp: Date.now() });
+        } catch (error) {
+            funFact = "No fun fact available.";
+        }
     }
+
+    res.json({
+        number: num,
+        is_prime: isPrime(num),
+        is_perfect: isPerfect(num),
+        properties,
+        digit_sum: getDigitSum(num),
+        fun_fact: funFact
+    });
 });
 
 app.listen(PORT, () => {
