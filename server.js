@@ -56,7 +56,7 @@ app.get("/api/classify-number", async (req, res) => {
         const funFact = funFactResponse.data.text;
         
         res.json({
-            num,
+            number:num,
             is_prime: isPrime(num),
             is_perfect: isPerfect(num),
             properties,
