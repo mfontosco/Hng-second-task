@@ -38,11 +38,11 @@ const getDigitSum = (num) => {
 };
 
 app.get("/number", async (req, res) => {
-    const { value } = req.query;
-    const number = parseInt(value);
+    const { number } = req.query;
+    const num = parseInt(number);
     
-    if (isNaN(number)) {
-        return res.status(400).json({ number: value, error: true });
+    if (isNaN(num)) {
+        return res.status(400).json({ number: num, error: true });
     }
 
     const properties = [];
