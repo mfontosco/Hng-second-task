@@ -49,10 +49,10 @@ app.get("/api/classify-number", async (req, res) => {
 
     const properties = [];
     if (isArmstrong(num)) properties.push("armstrong");
-    properties.push(number % 2 === 0 ? "even" : "odd");
+    properties.push(num % 2 === 0 ? "even" : "odd");
     
     try {
-        const funFactResponse = await axios.get(`http://numbersapi.com/${number}/math?json`);
+        const funFactResponse = await axios.get(`http://numbersapi.com/${num}/math?json`);
         const funFact = funFactResponse.data.text;
         
         res.json({
