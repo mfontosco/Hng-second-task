@@ -56,11 +56,11 @@ app.get("/api/classify-number", async (req, res) => {
         const funFact = funFactResponse.data.text;
         
         res.json({
-            number,
-            is_prime: isPrime(number),
-            is_perfect: isPerfect(number),
+            num,
+            is_prime: isPrime(num),
+            is_perfect: isPerfect(num),
             properties,
-            digit_sum: getDigitSum(number),
+            digit_sum: getDigitSum(num),
             fun_fact: funFact
         });
     } catch (error) {
